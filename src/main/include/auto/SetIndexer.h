@@ -17,7 +17,7 @@ class SetIndexer : public AutoStep {
         bool Execute() {
 
             Indexer::GetInstance().SetIndexerSpeed(m_speed);
-            return false;
+            return true;
         }
 
     private:
