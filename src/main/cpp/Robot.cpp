@@ -18,28 +18,50 @@
 #include "Indexer.h"
 #include "Intake.h"
 
+#include "auto/SetIndexer.h"
+#include "commonauto/AutoSequence.h"
+#include "commonauto/steps/WaitSeconds.h"
+
 frc::Joystick* playerOne;
 frc::XboxController* playerTwo;
+
+AutoSequence* bigSequence;
 
 void Robot::RobotInit() {
 
     playerOne = new frc::Joystick(R_controllerPortPlayerOne);
     playerTwo = new frc::XboxController(R_controllerPortPlayerTwo);
+
+    bigSequence = new AutoSequence(false);
 }
 
 void Robot::RobotPeriodic() {}
 
-void Robot::AutonomousInit() {}
+void Robot::AutonomousInit() {
 
-void Robot::AutonomousPeriodic() {}
-
-void Robot::TeleopInit() {
+    bigSequence->Reset();
+    
+    bigSequence->AddStep(new SetIndexer(1));
+    bigSequence->AddStep(new WaitSeconds(5));
+    bigSequence->AddStep(new SetIndexer(0));
 
     SwerveTrain::GetInstance().SetSwerveBrake(true);
     SwerveTrain::GetInstance().SetDriveBrake(true);
     NavX::GetInstance().resetYaw();
     SwerveTrain::GetInstance().SetZeroPosition();
+
+    bigSequence->Init();
 }
+
+void Robot::AutonomousPeriodic() {
+
+    if (bigSequence->Execute()) {
+
+        SwerveTrain::GetInstance().AssumeZeroPosition();
+    }
+}
+
+void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
 

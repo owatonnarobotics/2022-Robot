@@ -61,7 +61,7 @@ model {
                     include '**/*.cpp', '**/*.cc'
                 }
                 exportedHeaders {
-                    srcDir 'src/main/include'
+                    srcDirs 'src/main/include'
                     srcDirs 'src/books'
                 }
             }
