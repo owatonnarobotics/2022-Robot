@@ -1,0 +1,3 @@
+[submodule "src/books"]
+    path = src/books
+    url = https://github.com/owatonnarobotics/books.git
