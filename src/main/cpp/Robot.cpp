@@ -9,16 +9,22 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/Joystick.h>
+#include <frc/XboxController.h>
 
 #include "swerve/src/include/SwerveTrain.h"
 #include "controller/Controller.h"
 #include "limelight/Limelight.h"
+#include "Shooter.h"
+#include "Indexer.h"
+#include "Intake.h"
 
 frc::Joystick* playerOne;
+frc::XboxController* playerTwo;
 
 void Robot::RobotInit() {
 
     playerOne = new frc::Joystick(R_controllerPortPlayerOne);
+    playerTwo = new frc::XboxController(R_controllerPortPlayerTwo);
 }
 
 void Robot::RobotPeriodic() {}
@@ -27,7 +33,13 @@ void Robot::AutonomousInit() {}
 
 void Robot::AutonomousPeriodic() {}
 
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+
+    SwerveTrain::GetInstance().SetSwerveBrake(true);
+    SwerveTrain::GetInstance().SetDriveBrake(true);
+    NavX::GetInstance().resetYaw();
+    SwerveTrain::GetInstance().SetZeroPosition();
+}
 
 void Robot::TeleopPeriodic() {
 
@@ -64,18 +76,71 @@ void Robot::TeleopPeriodic() {
             -(((playerOne->GetThrottle() + 1.0) / 2.0) - 1.0)
         );
     }
+
+    if (playerTwo->GetRightTriggerAxis() < 0.2 ){
+        Shooter::GetInstance().SetShooterSpeed(0);
+    }
+
+
+    else if(( 0.2 <= playerTwo->GetRightTriggerAxis()) && (playerTwo->GetRightTriggerAxis() < 0.4 )){
+       Shooter::GetInstance().SetShooterSpeed(-0.85);
+    }
+
+    else if(( 0.4 <= playerTwo->GetRightTriggerAxis()) && (playerTwo->GetRightTriggerAxis() < 0.9 )){
+       Shooter::GetInstance().SetShooterSpeed(-0.92);
+    }
+
+    else if( 0.9 <= playerTwo->GetRightTriggerAxis()){
+       Shooter::GetInstance().SetShooterSpeed(-1);
+    }
+
+
+    if (playerTwo->GetRightBumper()){
+        Indexer::GetInstance().SetIndexerSpeed(-.5);
+    }
+    else if (playerTwo->GetLeftBumper()){
+       Indexer::GetInstance().SetIndexerSpeed(.5);
+    
+       
+    }
+    else{
+        Indexer::GetInstance().SetIndexerSpeed(0);
+    }
+
+
+    if(playerTwo->GetLeftTriggerAxis() > .5){
+        Intake::GetInstance().SetIntakeSpeed(-.5);
+    }
+    else if(playerTwo->GetBButton()){
+        Intake::GetInstance().SetIntakeSpeed(.5);
+    }
+    else {
+        Intake::GetInstance().SetIntakeSpeed(0);
+    }
+    
+    
+
+    /* Baseline code for a 4-stepped launcher instead a linear or parabolic launcher*/
+    /* "Just something I wanted to try" - Aids*/
+
+    
+    
 }
 
 void Robot::DisabledInit() {}
 
-void Robot::DisabledPeriodic() {}
+void Robot::DisabledPeriodic() {
+
+    SwerveTrain::GetInstance().SetSwerveBrake(false);
+    SwerveTrain::GetInstance().SetDriveBrake(false);
+}
 
 void Robot::TestInit() {}
 
 void Robot::TestPeriodic() {}
 
 #ifndef RUNNING_FRC_TESTS
-int main() {
+int main() { 
     return frc::StartRobot<Robot>();
 }
 #endif
