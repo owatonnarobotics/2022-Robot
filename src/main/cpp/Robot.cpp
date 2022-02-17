@@ -15,22 +15,34 @@
 #include "controller/Controller.h"
 #include "limelight/Limelight.h"
 #include "Shooter.h"
+#include "ShooterConsts.h"
 #include "Indexer.h"
 #include "Intake.h"
 
-#include "auto/SetIndexer.h"
 #include "commonauto/AutoSequence.h"
 #include "commonauto/steps/WaitSeconds.h"
+#include "commonauto/steps/TimeDriveForwardHold.h"
+#include "commonauto/steps/TurnToAbsoluteAngle.h"
+#include "commonauto/steps/LimelightLock.h"
+#include "auto/SetIndexer.h"
+#include "auto/SetShooter.h"
+#include "auto/SetIntake.h"
 
 frc::Joystick* playerOne;
 frc::XboxController* playerTwo;
 
+frc::SendableChooser<std::string>* autoChooser;
 AutoSequence* bigSequence;
 
 void Robot::RobotInit() {
 
     playerOne = new frc::Joystick(R_controllerPortPlayerOne);
     playerTwo = new frc::XboxController(R_controllerPortPlayerTwo);
+
+    autoChooser = new frc::SendableChooser<std::string>;
+    autoChooser->AddOption("Red tri-ball", "rtb");
+    autoChooser->SetDefaultOption("Blue tri-ball", "btb");
+    frc::SmartDashboard::PutData(autoChooser);
 
     bigSequence = new AutoSequence(false);
 }
@@ -40,10 +52,46 @@ void Robot::RobotPeriodic() {}
 void Robot::AutonomousInit() {
 
     bigSequence->Reset();
+
+    std::string selectedAuto = autoChooser->GetSelected();
+
+    if (selectedAuto == "rtb") {
     
-    bigSequence->AddStep(new SetIndexer(1));
-    bigSequence->AddStep(new WaitSeconds(5));
-    bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetIntake(1));
+        bigSequence->AddStep(new TimeDriveForwardHold(1.5));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(180));
+        bigSequence->AddStep(new TimeDriveForwardHold(1.0));
+        bigSequence->AddStep(new SetIntake(0));
+        
+        AsyncLoop* aimLoop = new AsyncLoop;
+        aimLoop->AddStep(new LimelightLock);
+        aimLoop->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(aimLoop);
+        
+        bigSequence->AddStep(new SetIntake(1));
+        bigSequence->AddStep(new SetIndexer(1));
+        bigSequence->AddStep(new WaitSeconds(3));
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+
+        bigSequence->AddStep(new TurnToAbsoluteAngle(100));
+        bigSequence->AddStep(new SetIntake(1));
+        bigSequence->AddStep(new TimeDriveForwardHold(2));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(270));
+
+        AsyncLoop* secondAimLoop = new AsyncLoop;
+        secondAimLoop->AddStep(new LimelightLock);
+        secondAimLoop->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(aimLoop);
+
+        bigSequence->AddStep(new SetIntake(1));
+        bigSequence->AddStep(new SetIndexer(1));
+        bigSequence->AddStep(new WaitSeconds(2));
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(0));
+    }
 
     SwerveTrain::GetInstance().SetSwerveBrake(true);
     SwerveTrain::GetInstance().SetDriveBrake(true);
