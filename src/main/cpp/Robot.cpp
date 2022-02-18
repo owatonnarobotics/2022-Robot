@@ -80,37 +80,56 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(new ResetNavXYaw);
 
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        // Spool up intake while driving to first cargo
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new TimeDriveForwardHold(1.5));
+
+        // After picking up the cargo, turn 180 degrees and drive back to 
+        // optimal shooting range. Turn off the intake, as the cargo should be
+        // full intaked by now.
         bigSequence->AddStep(new TurnToAbsoluteAngle(180));
-        bigSequence->AddStep(new TimeDriveForwardHold(1.0));
+        bigSequence->AddStep(new TimeDriveForwardHold(1.5));
         bigSequence->AddStep(new SetIntake(0));
-        
-        AsyncLoop* aimLoop = new AsyncLoop;
-        aimLoop->AddStep(new LimelightLock);
-        aimLoop->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(aimLoop);
-        
+
+        // Spool up launcher as we turn towards the goal
+        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(190));
+
+        // Shoot all the cargo
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(3));
+
+        // Don't waste voltage on the intake, indexer, and launcher while turning to the third
+        // cargo.
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(0));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(95));
 
-        bigSequence->AddStep(new TurnToAbsoluteAngle(0));
+        // Spool up the intake as we travel to pick up the third cargo
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new TimeDriveForwardHold(2));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(0));
 
+        // Spool up launcher as we turn towards the goal
+        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(225));
+
+        // Drive back to optimal shooting distance
+        bigSequence->AddStep(new TimeDriveForwardHold(1.0));
+
+        // Take one second to Limelight lock with the goal
         AsyncLoop* secondAimLoop = new AsyncLoop;
         secondAimLoop->AddStep(new LimelightLock);
         secondAimLoop->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(aimLoop);
+        bigSequence->AddStep(secondAimLoop);
 
+        // Shoot the thrid cargo
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(2));
+
+        // Turn off intake, indexer, and launcher
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
         bigSequence->AddStep(new SetShooter(0));
@@ -119,6 +138,7 @@ void Robot::AutonomousInit() {
     SwerveTrain::GetInstance().SetSwerveBrake(true);
     SwerveTrain::GetInstance().SetDriveBrake(true);
 
+    // Make sure we stop moving when we're done with any sequence
     bigSequence->AddStep(new Stop);
     bigSequence->Init();
 }
@@ -162,10 +182,10 @@ void Robot::TeleopPeriodic() {
         SwerveTrain::GetInstance().Drive(
             -x,
             -y,
-            playerOne->GetRawButton(6) ? Limelight::GetInstance().CalculateLimelightLockSpeed() : z,
+            playerOne->GetRawButton(2) ? Limelight::GetInstance().CalculateLimelightLockSpeed() : z,
             playerOne->GetRawButton(5),
+            playerOne->GetRawButton(6),
             playerOne->GetRawButton(7),
-            playerOne->GetRawButton(2),
             -(((playerOne->GetThrottle() + 1.0) / 2.0) - 1.0)
         );
     }
