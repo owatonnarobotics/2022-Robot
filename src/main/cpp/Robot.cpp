@@ -10,6 +10,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/Joystick.h>
 #include <frc/XboxController.h>
+#include <cameraserver/CameraServer.h>
 
 #include "swerve/src/include/SwerveTrain.h"
 #include "controller/Controller.h"
@@ -24,6 +25,8 @@
 #include "commonauto/steps/TimeDriveForwardHold.h"
 #include "commonauto/steps/TurnToAbsoluteAngle.h"
 #include "commonauto/steps/LimelightLock.h"
+#include "commonauto/steps/Stop.h"
+#include "commonauto/steps/ResetNavXYaw.h"
 #include "auto/SetIndexer.h"
 #include "auto/SetShooter.h"
 #include "auto/SetIntake.h"
@@ -35,6 +38,8 @@ frc::SendableChooser<std::string>* autoChooser;
 AutoSequence* bigSequence;
 
 void Robot::RobotInit() {
+
+    frc::CameraServer::StartAutomaticCapture();
 
     playerOne = new frc::Joystick(R_controllerPortPlayerOne);
     playerTwo = new frc::XboxController(R_controllerPortPlayerTwo);
@@ -56,9 +61,27 @@ void Robot::AutonomousInit() {
     std::string selectedAuto = autoChooser->GetSelected();
 
     if (selectedAuto == "rtb") {
-    
+        
+        // TODO: figure out why the NavX needs to be reset twice after each
+        // deploy. From what I have observed, the NavX recalibrates at the
+        // beginning of the FIRST ENABLE after every deploy. I am not sure what
+        // triggers the recalibration on the NavX, but from what I have read
+        // online, the NavX needs to be calibrated before calling its ZeroYaw
+        // function. It is possible that the reason it has to be called twice
+        // is that on the first call, the NavX sees that it needs to be
+        // initialized, does so, and moves on. Then, the second call to ZeroYaw
+        // actually registers because the NavX has been calibrated. It seems
+        // calling the ZeroYaw function, waiting a second, then calling
+        // the ZeroYaw function again results in a successful reset of the yaw.
+        // P.S. it is particularily interesting that the NavX ZeroYaw function
+        // works on the first try whenever the number of enables since the last
+        // deploy is greater than one.
+        bigSequence->AddStep(new ResetNavXYaw);
+        bigSequence->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(new ResetNavXYaw);
+
         bigSequence->AddStep(new SetShooter(R_shooterSpeed));
-        bigSequence->AddStep(new SetIntake(1));
+        bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new TimeDriveForwardHold(1.5));
         bigSequence->AddStep(new TurnToAbsoluteAngle(180));
         bigSequence->AddStep(new TimeDriveForwardHold(1.0));
@@ -69,24 +92,24 @@ void Robot::AutonomousInit() {
         aimLoop->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(aimLoop);
         
-        bigSequence->AddStep(new SetIntake(1));
-        bigSequence->AddStep(new SetIndexer(1));
+        bigSequence->AddStep(new SetIntake(0.5));
+        bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(3));
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
 
-        bigSequence->AddStep(new TurnToAbsoluteAngle(100));
-        bigSequence->AddStep(new SetIntake(1));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(0));
+        bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new TimeDriveForwardHold(2));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(270));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(0));
 
         AsyncLoop* secondAimLoop = new AsyncLoop;
         secondAimLoop->AddStep(new LimelightLock);
         secondAimLoop->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(aimLoop);
 
-        bigSequence->AddStep(new SetIntake(1));
-        bigSequence->AddStep(new SetIndexer(1));
+        bigSequence->AddStep(new SetIntake(0.5));
+        bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(2));
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
@@ -95,18 +118,14 @@ void Robot::AutonomousInit() {
 
     SwerveTrain::GetInstance().SetSwerveBrake(true);
     SwerveTrain::GetInstance().SetDriveBrake(true);
-    NavX::GetInstance().resetYaw();
-    SwerveTrain::GetInstance().SetZeroPosition();
 
+    bigSequence->AddStep(new Stop);
     bigSequence->Init();
 }
 
 void Robot::AutonomousPeriodic() {
 
-    if (bigSequence->Execute()) {
-
-        SwerveTrain::GetInstance().AssumeZeroPosition();
-    }
+    bigSequence->Execute();
 }
 
 void Robot::TeleopInit() {}
@@ -115,7 +134,11 @@ void Robot::TeleopPeriodic() {
 
     if (playerOne->GetRawButton(3)) {
 
-        SwerveTrain::GetInstance().SetZeroPosition();
+        SwerveTrain::GetInstance().SetSoftwareZero();
+    }
+    if (playerOne->GetRawButton(9) && playerOne->GetRawButton(10)) {
+
+        SwerveTrain::GetInstance().HardwareZero();
     }
     if (playerOne->GetRawButton(4)) {
 
