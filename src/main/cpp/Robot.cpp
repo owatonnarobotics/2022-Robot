@@ -45,8 +45,7 @@ void Robot::RobotInit() {
     playerTwo = new frc::XboxController(R_controllerPortPlayerTwo);
 
     autoChooser = new frc::SendableChooser<std::string>;
-    autoChooser->AddOption("Red tri-ball", "rtb");
-    autoChooser->SetDefaultOption("Blue tri-ball", "btb");
+    autoChooser->SetDefaultOption("tri-ball", "tb");
     frc::SmartDashboard::PutData(autoChooser);
 
     bigSequence = new AutoSequence(false);
@@ -60,7 +59,7 @@ void Robot::AutonomousInit() {
 
     std::string selectedAuto = autoChooser->GetSelected();
 
-    if (selectedAuto == "rtb") {
+    if (selectedAuto == "tb") {
         
         // TODO: figure out why the NavX needs to be reset twice after each
         // deploy. From what I have observed, the NavX recalibrates at the
