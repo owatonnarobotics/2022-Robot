@@ -16,7 +16,7 @@ class SetShooter : public AutoStep {
 
         bool Execute() {
 
-            Shooter::GetInstance().SetShooterSpeed(-m_speed);
+            Shooter::GetInstance().SetShooterSpeed(m_speed);
             return true;
         }
 

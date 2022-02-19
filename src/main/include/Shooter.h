@@ -15,7 +15,7 @@ class Shooter {
         }
 
         void SetShooterSpeed(const double &speedToSet) {
-            m_shooterMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, speedToSet);
+            m_shooterMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, -speedToSet);
         }
 
     private:
