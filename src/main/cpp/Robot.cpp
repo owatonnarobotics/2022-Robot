@@ -62,6 +62,8 @@ void Robot::RobotPeriodic() {}
 void Robot::AutonomousInit() {
 
     SwerveTrain::GetInstance().ResetHold();
+    // TODO: NEEDS TO CHANGE
+    SwerveTrain::GetInstance().HardwareZero();
 
     bigSequence->Reset();
 
@@ -108,6 +110,11 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(3));
+
+        // Spool down
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(0));
     }
     else if (selectedAuto == "2bm") {
 
@@ -134,6 +141,11 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(3));
+
+        // Spool down
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(0));
     }
     else if (selectedAuto == "2br") {
 
@@ -160,6 +172,11 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(3));
+
+        // Spool down
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(0));
     }
     else if (selectedAuto == "tb") {
         
@@ -189,7 +206,7 @@ void Robot::AutonomousInit() {
         // optimal shooting range. Turn off the intake, as the cargo should be
         // full intaked by now.
         bigSequence->AddStep(new TurnToAbsoluteAngle(180));
-        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.8));
+        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.6));
         bigSequence->AddStep(new SetIntake(0));
 
         // Spool up launcher as we turn towards the goal
@@ -206,18 +223,20 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
         bigSequence->AddStep(new SetShooter(0));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(60));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(85));
 
         // Spool up the intake as we travel to pick up the third cargo
         bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new TimeDriveHold(-0.866, -0.5, 3.0));
+        bigSequence->AddStep(new TimeDriveHold(-0.996, 0.087, 2.5));
+
+        bigSequence->AddStep(new TurnToAbsoluteAngle(255));
+
+        // Drive back to optimal shooting distance
+        bigSequence->AddStep(new TimeDriveHold(0.966, -0.259, 2.5));
 
         // Spool up launcher as we turn towards the goal
         bigSequence->AddStep(new SetShooter(R_shooterSpeed));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(240));
-
-        // Drive back to optimal shooting distance
-        bigSequence->AddStep(new TimeDriveHold(0.866, -0.5, 3.0));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(190));
 
         // Shoot the thrid cargo
         bigSequence->AddStep(new SetIntake(0.5));
@@ -253,7 +272,7 @@ void Robot::TeleopPeriodic() {
 
     if (playerOne->GetRawButton(3)) {
 
-        SwerveTrain::GetInstance().SetSoftwareZero();
+        SwerveTrain::GetInstance().HardwareZero();
     }
     if (playerOne->GetRawButton(9) && playerOne->GetRawButton(10)) {
 
