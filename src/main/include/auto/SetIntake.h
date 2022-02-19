@@ -16,7 +16,7 @@ class SetIntake : public AutoStep {
 
         bool Execute() {
 
-            Intake::GetInstance().SetIntakeSpeed(m_speed);
+            Intake::GetInstance().SetIntakeSpeed(-m_speed);
             return true;
         }
 

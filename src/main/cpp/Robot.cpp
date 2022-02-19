@@ -22,11 +22,12 @@
 
 #include "commonauto/AutoSequence.h"
 #include "commonauto/steps/WaitSeconds.h"
-#include "commonauto/steps/TimeDriveForwardHold.h"
+#include "commonauto/steps/TimeDriveHold.h"
 #include "commonauto/steps/TurnToAbsoluteAngle.h"
 #include "commonauto/steps/LimelightLock.h"
 #include "commonauto/steps/Stop.h"
 #include "commonauto/steps/ResetNavXYaw.h"
+#include "commonauto/steps/CalibrateNavXThenReset.h"
 #include "auto/SetIndexer.h"
 #include "auto/SetShooter.h"
 #include "auto/SetIntake.h"
@@ -49,11 +50,14 @@ void Robot::RobotInit() {
     frc::SmartDashboard::PutData(autoChooser);
 
     bigSequence = new AutoSequence(false);
+    bigSequence->EnableLogging();
 }
 
 void Robot::RobotPeriodic() {}
 
 void Robot::AutonomousInit() {
+
+    SwerveTrain::GetInstance().ResetHold();
 
     bigSequence->Reset();
 
@@ -75,19 +79,19 @@ void Robot::AutonomousInit() {
         // P.S. it is particularily interesting that the NavX ZeroYaw function
         // works on the first try whenever the number of enables since the last
         // deploy is greater than one.
-        bigSequence->AddStep(new ResetNavXYaw);
+        bigSequence->AddStep(new CalibrateNavXThenReset);
         bigSequence->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(new ResetNavXYaw);
 
         // Spool up intake while driving to first cargo
         bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new TimeDriveForwardHold(1.5));
+        bigSequence->AddStep(new TimeDriveHold(0, 1, 2.0));
 
         // After picking up the cargo, turn 180 degrees and drive back to 
         // optimal shooting range. Turn off the intake, as the cargo should be
         // full intaked by now.
         bigSequence->AddStep(new TurnToAbsoluteAngle(180));
-        bigSequence->AddStep(new TimeDriveForwardHold(1.5));
+        bigSequence->AddStep(new TimeDriveHold(0, -1, 2.0));
         bigSequence->AddStep(new SetIntake(0));
 
         // Spool up launcher as we turn towards the goal
@@ -104,24 +108,24 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
         bigSequence->AddStep(new SetShooter(0));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(95));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(105));
 
         // Spool up the intake as we travel to pick up the third cargo
         bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new TimeDriveForwardHold(2));
+        bigSequence->AddStep(new TimeDriveHold(-0.966, -0.259, 1.5));
 
         // Spool up launcher as we turn towards the goal
         bigSequence->AddStep(new SetShooter(R_shooterSpeed));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(225));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(240));
 
         // Drive back to optimal shooting distance
-        bigSequence->AddStep(new TimeDriveForwardHold(1.0));
+        bigSequence->AddStep(new TimeDriveHold(0.866, -0.5, 1.5));
 
         // Take one second to Limelight lock with the goal
-        AsyncLoop* secondAimLoop = new AsyncLoop;
-        secondAimLoop->AddStep(new LimelightLock);
-        secondAimLoop->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(secondAimLoop);
+        // AsyncLoop* secondAimLoop = new AsyncLoop;
+        // secondAimLoop->AddStep(new LimelightLock);
+        // secondAimLoop->AddStep(new WaitSeconds(1));
+        // bigSequence->AddStep(secondAimLoop);
 
         // Shoot the thrid cargo
         bigSequence->AddStep(new SetIntake(0.5));
@@ -147,7 +151,11 @@ void Robot::AutonomousPeriodic() {
     bigSequence->Execute();
 }
 
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+
+    SwerveTrain::GetInstance().SetSwerveBrake(true);
+    SwerveTrain::GetInstance().SetDriveBrake(true);
+}
 
 void Robot::TeleopPeriodic() {
 
