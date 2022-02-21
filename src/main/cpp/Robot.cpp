@@ -19,6 +19,7 @@
 #include "ShooterConsts.h"
 #include "Indexer.h"
 #include "Intake.h"
+#include "Climber.h"
 
 #include "commonauto/AutoSequence.h"
 #include "commonauto/steps/WaitSeconds.h"
@@ -340,6 +341,17 @@ void Robot::TeleopPeriodic() {
     else {
         Intake::GetInstance().SetIntakeSpeed(0);
     }
+
+    if(playerTwo->GetLeftY() > 0.25){
+        Climber::GetInstance().SetClimberSpeed(0.75);
+    }
+    else if(playerTwo->GetLeftY() < -0.25){
+        Climber::GetInstance().SetClimberSpeed(-0.75);
+    }
+    else{
+        Climber::GetInstance().SetClimberSpeed(0);
+    }
+    
     
     
 
