@@ -18,6 +18,11 @@ class Shooter {
             m_shooterMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, -speedToSet);
         }
 
+        double GetVelocity() {
+
+            return m_shooterMotor->GetSelectedSensorVelocity();
+        }
+
     private:
         Shooter(const int R_ShooterCANID) {
             m_shooterMotor = new ctre::phoenix::motorcontrol::can::TalonFX(R_ShooterCANID);

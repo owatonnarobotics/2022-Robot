@@ -211,14 +211,14 @@ void Robot::AutonomousInit() {
         // P.S. it is particularily interesting that the NavX ZeroYaw function
         // works on the first try whenever the number of enables since the last
         // deploy is greater than one.
+        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
         bigSequence->AddStep(new CalibrateNavXThenReset);
         bigSequence->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(new ResetNavXYaw);
 
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed * 0.9));
         bigSequence->AddStep(new TimeDriveHold(0, -1, 1));
         bigSequence->AddStep(new WaitSeconds(0.125));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(15));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(20));
 
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(0.25));
@@ -233,26 +233,29 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new WaitSeconds(0.125));
         
 
-        bigSequence->AddStep(new TurnToAbsoluteAngle(290));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(295));
         bigSequence->AddStep(new WaitSeconds(0.125));
-        bigSequence->AddStep(new TimeDriveHold(0.940, 0.342, 2.0));
+        bigSequence->AddStep(new TimeDriveHold(0.906, 0.423, 2.0));
+        
         bigSequence->AddStep(new WaitSeconds(0.25));
         bigSequence->AddStep(new TurnToAbsoluteAngle(75));
         bigSequence->AddStep(new WaitSeconds(0.125));
+
+        bigSequence->AddStep(new SetShooter(R_shooterSpeed * 0.9));
         bigSequence->AddStep(new TimeDriveHold(-0.966, 0.259, 1.9));
         bigSequence->AddStep(new SetIntake(0));
 
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed * 0.9));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(15));
-        bigSequence->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(25));
+        bigSequence->AddStep(new WaitSeconds(0.125));
+        
         // Shoot all the cargo
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
-        bigSequence->AddStep(new WaitSeconds(0.3));
+        bigSequence->AddStep(new WaitSeconds(0.125));
 
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new WaitSeconds(0.25));
+        bigSequence->AddStep(new WaitSeconds(0.125));
 
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new SetIndexer(0.5));
@@ -274,6 +277,8 @@ void Robot::AutonomousInit() {
 
 void Robot::AutonomousPeriodic() {
 
+    SwerveTrain::GetInstance().UpdateOdometry();
+
     bigSequence->Execute();
 }
 
@@ -284,6 +289,8 @@ void Robot::TeleopInit() {
 }
 
 void Robot::TeleopPeriodic() {
+
+    frc::SmartDashboard::PutNumber("Shooter velocity", Shooter::GetInstance().GetVelocity());
 
     if (playerOne->GetRawButton(3)) {
 
