@@ -81,5 +81,6 @@
     "typeinfo": "cpp",
     "*.mac": "cpp"
   },
-  "wpilib.autoStartRioLog": false
+  "wpilib.autoStartRioLog": false,
+  "C_Cpp.dimInactiveRegions": false
 }
