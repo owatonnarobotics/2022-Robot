@@ -13,11 +13,11 @@ class Climber {
             return *instance;
         }
 
-        void SetClimberSpeed(const double &speedToSet) {
+        void SetClimberSpeed(const double &speedToSet, const bool& override = false) {
 
-            frc::SmartDashboard::PutBoolean("ls", m_limitSwitch->Get());
+            frc::SmartDashboard::PutBoolean("Climber limit switch state", m_limitSwitch->Get());
 
-            if (m_limitSwitch->Get() && speedToSet > 0) {
+            if (!override && (m_limitSwitch->Get() && speedToSet > 0)) {
 
                 m_ClimberMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, 0);
                 m_ClimberMotor2->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, 0);

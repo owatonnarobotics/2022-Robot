@@ -15,6 +15,7 @@
 
 #include "swerve/src/include/SwerveTrain.h"
 #include "controller/Controller.h"
+#include "controller/Guitar.h"
 #include "Shooter.h"
 #include "ShooterConsts.h"
 #include "Indexer.h"
@@ -34,6 +35,7 @@
 
 frc::Joystick* playerOne;
 frc::XboxController* playerTwo;
+Guitar* guitar;
 
 frc::SendableChooser<std::string>* autoChooser;
 AutoSequence* bigSequence;
@@ -44,6 +46,7 @@ void Robot::RobotInit() {
 
     playerOne = new frc::Joystick(R_controllerPortPlayerOne);
     playerTwo = new frc::XboxController(R_controllerPortPlayerTwo);
+    guitar = new Guitar(R_controllerPortGuitar);
 
     autoChooser = new frc::SendableChooser<std::string>;
     autoChooser->AddOption("one ball", "1b");
@@ -291,6 +294,8 @@ void Robot::TeleopInit() {
 
 void Robot::TeleopPeriodic() {
 
+    guitar->Update();
+
     frc::SmartDashboard::PutNumber("Shooter velocity", Shooter::GetInstance().GetVelocity());
 
     if (playerOne->GetRawButton(3)) {
@@ -360,21 +365,24 @@ void Robot::TeleopPeriodic() {
         Intake::GetInstance().SetIntakeSpeed(0);
     }
     
+    if (guitar->GetGuitarButton(Guitar::GuitarButton::kGreen)) {
+
+        Climber::GetInstance().SetClimberSpeed(guitar->StrumVelocity());
+    }
+    else if (guitar->GetGuitarButton(Guitar::GuitarButton::kRed)) {
+
+        Climber::GetInstance().SetClimberSpeed(-guitar->StrumVelocity());
+    }
+
     if(abs(playerTwo->GetLeftY()) > 0.25){
-        Climber::GetInstance().SetClimberSpeed(playerTwo->GetLeftY() * 0.75);
+        Climber::GetInstance().SetClimberSpeed(playerTwo->GetLeftY() * 0.75, playerTwo->GetBackButton());
     }
     else{
         Climber::GetInstance().SetClimberSpeed(0);
     }
-    
-    
-    
 
     /* Baseline code for a 4-stepped launcher instead a linear or parabolic launcher*/
     /* "Just something I wanted to try" - Aids*/
-
-    
-    frc::SmartDashboard::PutNumber("angle", NavX::GetInstance().getYawFull());
 }
 
 void Robot::DisabledInit() {}
