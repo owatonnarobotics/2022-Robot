@@ -11,6 +11,7 @@
 #include <frc/Joystick.h>
 #include <frc/XboxController.h>
 #include <cameraserver/CameraServer.h>
+#include <frc/DigitalInput.h>
 
 #include "swerve/src/include/SwerveTrain.h"
 #include "controller/Controller.h"
@@ -358,12 +359,9 @@ void Robot::TeleopPeriodic() {
     else {
         Intake::GetInstance().SetIntakeSpeed(0);
     }
-
-    if(playerTwo->GetLeftY() > 0.25){
-        Climber::GetInstance().SetClimberSpeed(0.75);
-    }
-    else if(playerTwo->GetLeftY() < -0.25){
-        Climber::GetInstance().SetClimberSpeed(-0.75);
+    
+    if(abs(playerTwo->GetLeftY()) > 0.25){
+        Climber::GetInstance().SetClimberSpeed(playerTwo->GetLeftY() * 0.75);
     }
     else{
         Climber::GetInstance().SetClimberSpeed(0);

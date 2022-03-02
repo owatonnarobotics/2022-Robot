@@ -6,3 +6,4 @@ const int R_IntakeCANID = 15;
 const double R_shooterSpeed = 0.92;
 const int R_ClimberCANID = 16;
 const int R_ClimberCANID2 = 17;
+const int R_LimitSwitch = 0;

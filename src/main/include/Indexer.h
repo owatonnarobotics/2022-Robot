@@ -14,7 +14,7 @@ class Indexer{
         }
     
         void SetIndexerSpeed(const double &speedToSet) {
-            m_indexerMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, speedToSet);
+            m_indexerMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, -speedToSet);
         }
 
     private:
