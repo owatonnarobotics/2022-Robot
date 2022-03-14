@@ -56,7 +56,7 @@ void Robot::RobotInit() {
     autoChooser->SetDefaultOption("tri-ball", "tb");
     frc::SmartDashboard::PutData(autoChooser);
 
-    frc::SmartDashboard::PutNumber("Shooter speed", R_shooterSpeed);
+    frc::SmartDashboard::PutNumber("Shooter speed", R_shooterVelocity);
     frc::SmartDashboard::PutNumber("Spinner speed", 0);
 
     bigSequence = new AutoSequence(false);
@@ -81,7 +81,7 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(new ResetNavXYaw);
 
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
         bigSequence->AddStep(new TimeDriveHold(0, -1, 1));
         bigSequence->AddStep(new WaitSeconds(1));
 
@@ -115,7 +115,7 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0));
 
         // Spool up launcher as we turn towards the goal
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
         bigSequence->AddStep(new TurnToAbsoluteAngle(195));
         bigSequence->AddStep(new WaitSeconds(1));
 
@@ -157,7 +157,7 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0));
 
         // Spool up launcher as we turn towards the goal
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
         bigSequence->AddStep(new TurnToAbsoluteAngle(160));
         bigSequence->AddStep(new WaitSeconds(1));
 
@@ -200,7 +200,7 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIntake(0));
 
         // Spool up launcher as we turn towards the goal
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
         bigSequence->AddStep(new TurnToAbsoluteAngle(170));
         bigSequence->AddStep(new WaitSeconds(1));
 
@@ -310,8 +310,6 @@ void Robot::TeleopInit() {
 
     SwerveTrain::GetInstance().SetSwerveBrake(true);
     SwerveTrain::GetInstance().SetDriveBrake(true);
-
-    frc::SmartDashboard::PutNumber("Shooter speed", R_shooterSpeed);
 }
 
 void Robot::TeleopPeriodic() {
@@ -353,8 +351,8 @@ void Robot::TeleopPeriodic() {
 
     if(playerTwo->GetRightTriggerAxis() >= 0.5){
 
-       Shooter::GetInstance().SetShooterSpeed(frc::SmartDashboard::GetNumber("Shooter speed", R_shooterSpeed));
-       Shooter::GetInstance().SetSpinSpeed(frc::SmartDashboard::GetNumber("Spinner speed", R_shooterSpeed));
+       Shooter::GetInstance().SetShooterSpeed(frc::SmartDashboard::GetNumber("Shooter speed", R_shooterVelocity));
+       Shooter::GetInstance().SetSpinSpeed(frc::SmartDashboard::GetNumber("Spinner speed", R_spinnerVelocity));
     }
     else {
 
