@@ -238,14 +238,13 @@ void Robot::AutonomousInit() {
         // P.S. it is particularily interesting that the NavX ZeroYaw function
         // works on the first try whenever the number of enables since the last
         // deploy is greater than one.
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetShooter(1));
         bigSequence->AddStep(new CalibrateNavXThenReset);
-        bigSequence->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(new WaitSeconds(1.25));
         bigSequence->AddStep(new ResetNavXYaw);
 
         bigSequence->AddStep(new TimeDriveHold(0, -1, 1));
-        bigSequence->AddStep(new WaitSeconds(0.125));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(20));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(15));
         bigSequence->AddStep(new WaitSeconds(0.125));
 
         bigSequence->AddStep(new SetIndexer(0.5));
@@ -258,21 +257,19 @@ void Robot::AutonomousInit() {
 
         bigSequence->AddStep(new SetIntake(0.5));
         bigSequence->AddStep(new TimeDriveHold(0, -1, 1.7));
-        bigSequence->AddStep(new WaitSeconds(0.125));
         
         bigSequence->AddStep(new TurnToAbsoluteAngle(290));
         bigSequence->AddStep(new WaitSeconds(0.125));
         bigSequence->AddStep(new TimeDriveHold(0.940, 0.342, 2.0));
         
-        bigSequence->AddStep(new WaitSeconds(0.25));
         bigSequence->AddStep(new TurnToAbsoluteAngle(75));
         bigSequence->AddStep(new WaitSeconds(0.125));
 
-        bigSequence->AddStep(new SetShooter(R_shooterSpeed));
+        bigSequence->AddStep(new SetShooter(0.9));
         bigSequence->AddStep(new TimeDriveHold(-0.966, 0.259, 1.9));
         bigSequence->AddStep(new SetIntake(0));
 
-        bigSequence->AddStep(new TurnToAbsoluteAngle(17));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(14));
         bigSequence->AddStep(new WaitSeconds(0.125));
         
         // Shoot all the cargo
@@ -313,6 +310,8 @@ void Robot::TeleopInit() {
 
     SwerveTrain::GetInstance().SetSwerveBrake(true);
     SwerveTrain::GetInstance().SetDriveBrake(true);
+
+    frc::SmartDashboard::PutNumber("Shooter speed", R_shooterSpeed);
 }
 
 void Robot::TeleopPeriodic() {
