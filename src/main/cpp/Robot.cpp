@@ -56,6 +56,9 @@ void Robot::RobotInit() {
     autoChooser->SetDefaultOption("tri-ball", "tb");
     frc::SmartDashboard::PutData(autoChooser);
 
+    frc::SmartDashboard::PutNumber("Shooter speed", R_shooterSpeed);
+    frc::SmartDashboard::PutNumber("Spinner speed", 0);
+
     bigSequence = new AutoSequence(false);
     bigSequence->EnableLogging();
 }
@@ -317,6 +320,7 @@ void Robot::TeleopPeriodic() {
     guitar->Update();
 
     frc::SmartDashboard::PutNumber("Shooter velocity", Shooter::GetInstance().GetVelocity());
+    frc::SmartDashboard::PutNumber("Spinner velocity", Shooter::GetInstance().GetVelocitySpinner());
 
     if (playerOne->GetRawButton(9) && playerOne->GetRawButton(10)) {
 
@@ -350,11 +354,13 @@ void Robot::TeleopPeriodic() {
 
     if(playerTwo->GetRightTriggerAxis() >= 0.5){
 
-       Shooter::GetInstance().SetShooterSpeed(R_shooterSpeed);
+       Shooter::GetInstance().SetShooterSpeed(frc::SmartDashboard::GetNumber("Shooter speed", R_shooterSpeed));
+       Shooter::GetInstance().SetSpinSpeed(frc::SmartDashboard::GetNumber("Spinner speed", R_shooterSpeed));
     }
     else {
 
         Shooter::GetInstance().SetShooterSpeed(0);
+        Shooter::GetInstance().SetSpinSpeed(0);
     }
 
 
@@ -363,8 +369,7 @@ void Robot::TeleopPeriodic() {
     }
     else if (playerTwo->GetLeftBumper()){
        Indexer::GetInstance().SetIndexerSpeed(.5);
-    
-       
+
     }
     else{
         Indexer::GetInstance().SetIndexerSpeed(0);

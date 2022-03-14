@@ -10,25 +10,34 @@ class Shooter {
     
     public:
         static Shooter& GetInstance() {
-            static Shooter* instance = new Shooter(R_ShooterCANID);
+            static Shooter* instance = new Shooter(R_ShooterCANID, R_SpinnerCANID);
             return *instance;
         }
 
         void SetShooterSpeed(const double &speedToSet) {
             m_shooterMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, -speedToSet);
         }
+        void SetSpinSpeed(const double &speedToSet){
+            m_spinnerMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, speedToSet);
+        }
 
         double GetVelocity() {
 
             return m_shooterMotor->GetSelectedSensorVelocity();
         }
+        double GetVelocitySpinner() {
+
+            return m_spinnerMotor->GetSelectedSensorVelocity();
+        }
 
     private:
-        Shooter(const int R_ShooterCANID) {
+        Shooter(const int R_ShooterCANID, const int R_SpinnerCANID) {
             m_shooterMotor = new ctre::phoenix::motorcontrol::can::TalonFX(R_ShooterCANID);
-        
+            m_spinnerMotor = new ctre::phoenix::motorcontrol::can::TalonFX(R_SpinnerCANID);
+
+            m_shooterMotor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
+            m_spinnerMotor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
         }
         ctre::phoenix::motorcontrol::can::TalonFX *m_shooterMotor; //joe's contribution
-        
-
+        ctre::phoenix::motorcontrol::can::TalonFX *m_spinnerMotor;
 };
