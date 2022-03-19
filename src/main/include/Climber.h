@@ -9,7 +9,7 @@ class Climber {
 
     public:
         static Climber& GetInstance() {
-            static Climber* instance = new Climber(R_ClimberCANID, R_ClimberCANID2, R_LimitSwitch);
+            static Climber* instance = new Climber(R_ClimberCANID, R_ClimberCANID2, R_LimitSwitch, R_ClimberSolenoid);
             return *instance;
         }
 
@@ -28,15 +28,25 @@ class Climber {
                 m_ClimberMotor2->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, speedToSet);
             }
         }
+        void extendPneumatics(){
+            m_ClimberSolenoid->Set(true);
+        }
+        void retractPneumatics(){
+            m_ClimberSolenoid->Set(false);
+        }
     
     private:
-        Climber(const int R_ClimberCANID, const int R_ClimberCANID2, const int R_LimitSwitch) {
+        Climber(const int R_ClimberCANID, const int R_ClimberCANID2, const int R_LimitSwitch, const int R_ClimberSolenoid) {
             m_ClimberMotor = new ctre::phoenix::motorcontrol::can::VictorSPX(R_ClimberCANID);
             m_ClimberMotor2 = new ctre::phoenix::motorcontrol::can::VictorSPX(R_ClimberCANID2);
             m_limitSwitch = new frc::DigitalInput (R_LimitSwitch);
+            m_ClimberSolenoid = new frc::Solenoid {frc::PneumaticsModuleType::CTREPCM, R_ClimberSolenoid};
         }
         
         ctre::phoenix::motorcontrol::can::VictorSPX *m_ClimberMotor;
         ctre::phoenix::motorcontrol::can::VictorSPX *m_ClimberMotor2;
         frc::DigitalInput *m_limitSwitch;
+        frc::Solenoid *m_ClimberSolenoid;
 };
+
+

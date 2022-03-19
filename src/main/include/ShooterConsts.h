@@ -9,3 +9,4 @@ const int R_ClimberCANID2 = 17;
 const int R_LimitSwitch = 0;
 const int R_SpinnerCANID = 20;
 const double R_secondShooterSpeed = .92;
+const int R_ClimberSolenoid = 0;

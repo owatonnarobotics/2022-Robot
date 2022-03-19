@@ -12,6 +12,7 @@
 #include <frc/XboxController.h>
 #include <cameraserver/CameraServer.h>
 #include <frc/DigitalInput.h>
+#include <frc/Solenoid.h>
 
 #include "swerve/src/include/SwerveTrain.h"
 #include "controller/Controller.h"
@@ -383,6 +384,12 @@ void Robot::TeleopPeriodic() {
     }
     else {
         Intake::GetInstance().SetIntakeSpeed(0);
+    }
+    if(playerTwo->GetAButton()){
+        Climber::GetInstance().retractPneumatics();
+    }
+    else{
+        Climber::GetInstance().extendPneumatics();
     }
 
     if(abs(playerTwo->GetLeftY()) > 0.25){
