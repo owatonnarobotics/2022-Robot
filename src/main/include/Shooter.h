@@ -14,11 +14,11 @@ class Shooter {
             return *instance;
         }
 
-        void SetShooterSpeed(const double &speedToSet) {
-            m_shooterMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, -speedToSet);
+        void SetShooterSpeed(const double &velocityToSet) {
+            m_shooterMotor->Set(ctre::phoenix::motorcontrol::ControlMode::Velocity, -velocityToSet);
         }
-        void SetSpinSpeed(const double &speedToSet){
-            m_spinnerMotor->Set(ctre::phoenix::motorcontrol::ControlMode::PercentOutput, speedToSet);
+        void SetSpinSpeed(const double &velocityToSet){
+            m_spinnerMotor->Set(ctre::phoenix::motorcontrol::ControlMode::Velocity, velocityToSet);
         }
 
         double GetVelocity() {
