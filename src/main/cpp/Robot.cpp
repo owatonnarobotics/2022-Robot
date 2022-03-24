@@ -51,14 +51,15 @@ void Robot::RobotInit() {
 
     autoChooser = new frc::SendableChooser<std::string>;
     autoChooser->AddOption("one ball", "1b");
-    autoChooser->AddOption("two ball top", "2bt");
     autoChooser->AddOption("two ball middle", "2bm");
-    autoChooser->AddOption("two ball rungs", "2br");
+    autoChooser->AddOption("two ball sides", "2bs");
     autoChooser->SetDefaultOption("tri-ball", "tb");
     frc::SmartDashboard::PutData(autoChooser);
 
-    frc::SmartDashboard::PutNumber("Shooter speed", R_shooterVelocity);
-    frc::SmartDashboard::PutNumber("Spinner speed", 0);
+    frc::SmartDashboard::PutNumber("Shooter speed close", R_shooterVelocityClose);
+    frc::SmartDashboard::PutNumber("Spinner speed close", R_spinnerVelocityClose);
+    frc::SmartDashboard::PutNumber("Shooter speed far", R_shooterVelocityFar);
+    frc::SmartDashboard::PutNumber("Spinner speed far", R_spinnerVelocityFar);
 
     bigSequence = new AutoSequence(false);
     bigSequence->EnableLogging();
@@ -82,7 +83,7 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new WaitSeconds(1));
         bigSequence->AddStep(new ResetNavXYaw);
 
-        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocityClose, R_spinnerVelocityClose));
         bigSequence->AddStep(new TimeDriveHold(0, -1, 1));
         bigSequence->AddStep(new WaitSeconds(1));
 
@@ -92,51 +93,9 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetIndexer(0.5));
         bigSequence->AddStep(new WaitSeconds(2));
 
-        bigSequence->AddStep(new SetShooter(0));
+        bigSequence->AddStep(new SetShooter(0, 0));
         bigSequence->AddStep(new SetIndexer(0));
         bigSequence->AddStep(new TimeDriveHold(0, -1, 2.0));
-    }
-    else if (selectedAuto == "2bt") {
-
-        bigSequence->AddStep(new CalibrateNavXThenReset);
-        bigSequence->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(new ResetNavXYaw);
-
-        // Spool up intake while driving to first cargo and wait a second
-        bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new TimeDriveHold(0, 1, 1.9));
-        bigSequence->AddStep(new WaitSeconds(1));
-
-        // After picking up the cargo, turn 180 degrees and drive back to 
-        // optimal shooting range. Turn off the intake, as the cargo should be
-        // full intaked by now.
-        bigSequence->AddStep(new TurnToAbsoluteAngle(180));
-        bigSequence->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.8));
-        bigSequence->AddStep(new SetIntake(0));
-
-        // Spool up launcher as we turn towards the goal
-        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(195));
-        bigSequence->AddStep(new WaitSeconds(1));
-
-        // Shoot all the cargo
-        bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new SetIndexer(0.5));
-        bigSequence->AddStep(new WaitSeconds(0.3));
-
-        bigSequence->AddStep(new SetIntake(0));
-        bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new WaitSeconds(1));
-
-        bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new SetIndexer(0.5));
-        bigSequence->AddStep(new WaitSeconds(3));
-
-        // Spool down
-        bigSequence->AddStep(new SetIntake(0));
-        bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new SetShooter(0));
     }
     else if (selectedAuto == "2bm") {
 
@@ -146,62 +105,19 @@ void Robot::AutonomousInit() {
 
         // Spool up intake while driving to first cargo and wait a second
         bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new TimeDriveHold(0, 1, 1.9));
+        bigSequence->AddStep(new TimeDriveHold(0, 1, 1.5));
         bigSequence->AddStep(new WaitSeconds(1));
 
         // After picking up the cargo, turn 180 degrees and drive back to 
         // optimal shooting range. Turn off the intake, as the cargo should be
         // full intaked by now.
         bigSequence->AddStep(new TurnToAbsoluteAngle(180));
-        bigSequence->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.8));
         bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.3));
 
         // Spool up launcher as we turn towards the goal
-        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(160));
-        bigSequence->AddStep(new WaitSeconds(1));
-
-        // Shoot all the cargo
-        bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new SetIndexer(0.5));
-        bigSequence->AddStep(new WaitSeconds(0.3));
-
-        bigSequence->AddStep(new SetIntake(0));
-        bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new WaitSeconds(1));
-
-        bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new SetIndexer(0.5));
-        bigSequence->AddStep(new WaitSeconds(3));
-
-        // Spool down
-        bigSequence->AddStep(new SetIntake(0));
-        bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new SetShooter(0));
-    }
-
-    else if (selectedAuto == "2br") {
-
-        bigSequence->AddStep(new CalibrateNavXThenReset);
-        bigSequence->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(new ResetNavXYaw);
-
-        // Spool up intake while driving to first cargo and wait a second
-        bigSequence->AddStep(new SetIntake(0.5));
-        bigSequence->AddStep(new TimeDriveHold(0, 1, 1.9));
-        bigSequence->AddStep(new WaitSeconds(1));
-
-        // After picking up the cargo, turn 180 degrees and drive back to 
-        // optimal shooting range. Turn off the intake, as the cargo should be
-        // full intaked by now.
-        bigSequence->AddStep(new TurnToAbsoluteAngle(180));
-        bigSequence->AddStep(new WaitSeconds(1));
-        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.8));
-        bigSequence->AddStep(new SetIntake(0));
-
-        // Spool up launcher as we turn towards the goal
-        bigSequence->AddStep(new SetShooter(R_shooterVelocity));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocityFar, R_spinnerVelocityFar));
         bigSequence->AddStep(new TurnToAbsoluteAngle(170));
         bigSequence->AddStep(new WaitSeconds(1));
 
@@ -221,7 +137,50 @@ void Robot::AutonomousInit() {
         // Spool down
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new SetShooter(0));
+        bigSequence->AddStep(new SetShooter(0, 0));
+    }
+
+    else if (selectedAuto == "2br") {
+
+        bigSequence->AddStep(new CalibrateNavXThenReset);
+        bigSequence->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(new ResetNavXYaw);
+
+        // Spool up intake while driving to first cargo and wait a second
+        bigSequence->AddStep(new SetIntake(0.5));
+        bigSequence->AddStep(new TimeDriveHold(0, 1, 1.5));
+        bigSequence->AddStep(new WaitSeconds(1));
+
+        // After picking up the cargo, turn 180 degrees and drive back to 
+        // optimal shooting range. Turn off the intake, as the cargo should be
+        // full intaked by now.
+        bigSequence->AddStep(new TurnToAbsoluteAngle(180));
+        bigSequence->AddStep(new WaitSeconds(1));
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new TimeDriveHold(0, -1, 1.3));
+
+        // Spool up launcher as we turn towards the goal
+        bigSequence->AddStep(new SetShooter(R_shooterVelocityFar, R_spinnerVelocityFar));
+        //bigSequence->AddStep(new TurnToAbsoluteAngle(170));
+        bigSequence->AddStep(new WaitSeconds(1));
+
+        // Shoot all the cargo
+        bigSequence->AddStep(new SetIntake(0.5));
+        bigSequence->AddStep(new SetIndexer(0.5));
+        bigSequence->AddStep(new WaitSeconds(0.3));
+
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new WaitSeconds(1));
+
+        bigSequence->AddStep(new SetIntake(0.5));
+        bigSequence->AddStep(new SetIndexer(0.5));
+        bigSequence->AddStep(new WaitSeconds(3));
+
+        // Spool down
+        bigSequence->AddStep(new SetIntake(0));
+        bigSequence->AddStep(new SetIndexer(0));
+        bigSequence->AddStep(new SetShooter(0, 0));
     }
     else if (selectedAuto == "tb") {
         
@@ -239,18 +198,18 @@ void Robot::AutonomousInit() {
         // P.S. it is particularily interesting that the NavX ZeroYaw function
         // works on the first try whenever the number of enables since the last
         // deploy is greater than one.
-        bigSequence->AddStep(new SetShooter(1));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocityClose, R_spinnerVelocityClose));
         bigSequence->AddStep(new CalibrateNavXThenReset);
-        bigSequence->AddStep(new WaitSeconds(1.25));
+        bigSequence->AddStep(new WaitSeconds(1.5));
         bigSequence->AddStep(new ResetNavXYaw);
 
         bigSequence->AddStep(new TimeDriveHold(0, -1, 1));
-        bigSequence->AddStep(new TurnToAbsoluteAngle(15));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(10));
         bigSequence->AddStep(new WaitSeconds(0.125));
 
         bigSequence->AddStep(new SetIndexer(0.5));
-        bigSequence->AddStep(new WaitSeconds(0.25));
-        bigSequence->AddStep(new SetShooter(0));
+        bigSequence->AddStep(new WaitSeconds(0.4));
+        bigSequence->AddStep(new SetShooter(0, 0));
         bigSequence->AddStep(new SetIndexer(0));
 
         bigSequence->AddStep(new TurnToAbsoluteAngle(180));
@@ -263,14 +222,12 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new WaitSeconds(0.125));
         bigSequence->AddStep(new TimeDriveHold(0.940, 0.342, 2.0));
         
-        bigSequence->AddStep(new TurnToAbsoluteAngle(75));
+        bigSequence->AddStep(new TurnToAbsoluteAngle(40));
         bigSequence->AddStep(new WaitSeconds(0.125));
 
-        bigSequence->AddStep(new SetShooter(0.9));
-        bigSequence->AddStep(new TimeDriveHold(-0.966, 0.259, 1.9));
+        bigSequence->AddStep(new SetShooter(R_shooterVelocityFar, R_spinnerVelocityFar));
+        bigSequence->AddStep(new TimeDriveHold(-0.643, 0.766, 1.4));
         bigSequence->AddStep(new SetIntake(0));
-
-        bigSequence->AddStep(new TurnToAbsoluteAngle(14));
         bigSequence->AddStep(new WaitSeconds(0.125));
         
         // Shoot all the cargo
@@ -289,7 +246,7 @@ void Robot::AutonomousInit() {
         // Spool down
         bigSequence->AddStep(new SetIntake(0));
         bigSequence->AddStep(new SetIndexer(0));
-        bigSequence->AddStep(new SetShooter(0));
+        bigSequence->AddStep(new SetShooter(0, 0));
     }
 
     SwerveTrain::GetInstance().SetSwerveBrake(true);
@@ -350,10 +307,19 @@ void Robot::TeleopPeriodic() {
         );
     }
 
-    if(playerTwo->GetRightTriggerAxis() >= 0.5){
+    if(playerTwo->GetRightY() <= -0.5){
 
-       Shooter::GetInstance().SetShooterSpeed(frc::SmartDashboard::GetNumber("Shooter speed", R_shooterVelocity));
-       Shooter::GetInstance().SetSpinSpeed(frc::SmartDashboard::GetNumber("Spinner speed", R_spinnerVelocity));
+       Shooter::GetInstance().SetShooterSpeed(frc::SmartDashboard::GetNumber("Shooter speed far", R_shooterVelocityFar));
+       Shooter::GetInstance().SetSpinSpeed(frc::SmartDashboard::GetNumber("Spinner speed far", R_spinnerVelocityFar));
+    }
+    else if(playerTwo->GetRightY() >= 0.5){
+
+       Shooter::GetInstance().SetShooterSpeed(frc::SmartDashboard::GetNumber("Shooter speed close", R_shooterVelocityClose));
+       Shooter::GetInstance().SetSpinSpeed(frc::SmartDashboard::GetNumber("Spinner speed close", R_spinnerVelocityClose));
+    }
+    else if(playerTwo->GetRightStickButton()){
+        Shooter::GetInstance().SetShooterSpeed(100);
+        Shooter::GetInstance().SetSpinSpeed(300);
     }
     else {
 
@@ -365,9 +331,8 @@ void Robot::TeleopPeriodic() {
     if (playerTwo->GetRightBumper()){
         Indexer::GetInstance().SetIndexerSpeed(-.5);
     }
-    else if (playerTwo->GetLeftBumper()){
-       Indexer::GetInstance().SetIndexerSpeed(.5);
-
+    else if(playerTwo->GetRightTriggerAxis() > 0.5){
+        Indexer::GetInstance().SetIndexerSpeed(.5);
     }
     else{
         Indexer::GetInstance().SetIndexerSpeed(0);
@@ -377,12 +342,14 @@ void Robot::TeleopPeriodic() {
     if(playerTwo->GetLeftTriggerAxis() > .5){
         Intake::GetInstance().SetIntakeSpeed(-.5);
     }
-    else if(playerTwo->GetBButton()){
-        Intake::GetInstance().SetIntakeSpeed(.5);
+    else if (playerTwo->GetLeftBumper()){
+       Intake::GetInstance().SetIntakeSpeed(.5);
     }
     else {
         Intake::GetInstance().SetIntakeSpeed(0);
     }
+
+
     if(playerTwo->GetAButton()){
         Climber::GetInstance().retractPneumatics();
     }

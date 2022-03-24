@@ -9,5 +9,8 @@ const int R_LimitSwitch = 0;
 const int R_SpinnerCANID = 20;
 const double R_secondShooterSpeed = .92;
 const int R_ClimberSolenoid = 0;
-const double R_shooterVelocity = 307;
-const double R_spinnerVelocity = 421;
+const double R_shooterVelocityClose = 240;
+const double R_spinnerVelocityClose = 300;
+const double R_shooterVelocityFar = 240;
+const double R_spinnerVelocityFar = 444;
+
