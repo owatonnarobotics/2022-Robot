@@ -22,6 +22,7 @@
 #include "Indexer.h"
 #include "Intake.h"
 #include "Climber.h"
+#include "limelight/Limelight.h"
 
 #include "commonauto/AutoSequence.h"
 #include "commonauto/steps/WaitSeconds.h"
@@ -297,10 +298,21 @@ void Robot::TeleopPeriodic() {
         double z = playerOne->GetZ();
         Controller::forceControllerXYZToZeroInDeadzone(x, y, z);
 
+        if (playerOne->GetRawButton(2)) {
+
+            z = Limelight::GetInstance().CalculateLimelightLockSpeed();
+            frc::SmartDashboard::PutNumber("z", z);
+        }
+        else {
+
+            Limelight::GetInstance().setLime(false);
+            z *= R_controllerZMultiplier;
+        }
+
         SwerveTrain::GetInstance().Drive(
             -x,
             -y,
-            z * R_controllerZMultiplier,
+            z,
             playerOne->GetRawButton(5),
             playerOne->GetRawButton(3),
             -(((playerOne->GetThrottle() + 1.0) / 2.0) - 1.0)
@@ -350,23 +362,22 @@ void Robot::TeleopPeriodic() {
     }
 
 
-    if(playerTwo->GetAButton()){
-        Climber::GetInstance().retractPneumatics();
+    if(playerTwo->GetAButtonPressed() || guitar->GetGuitarButtonPressed(Guitar::GuitarButton::kYellow)){
+        
+        Climber::GetInstance().SwitchPneumatics();
     }
-    else{
-        Climber::GetInstance().extendPneumatics();
-    }
+
 
     if(abs(playerTwo->GetLeftY()) > 0.25){
         Climber::GetInstance().SetClimberSpeed(playerTwo->GetLeftY() * 0.75, playerTwo->GetBackButton());
     }
     else if (guitar->GetGuitarButton(Guitar::GuitarButton::kGreen)) {
 
-        Climber::GetInstance().SetClimberSpeed(guitar->StrumVelocity());
+        Climber::GetInstance().SetClimberSpeed(-1);
     }
     else if (guitar->GetGuitarButton(Guitar::GuitarButton::kRed)) {
 
-        Climber::GetInstance().SetClimberSpeed(-guitar->StrumVelocity());
+        Climber::GetInstance().SetClimberSpeed(1);
     }
     else{
         Climber::GetInstance().SetClimberSpeed(0);
@@ -382,6 +393,7 @@ void Robot::DisabledPeriodic() {
 
     SwerveTrain::GetInstance().SetSwerveBrake(false);
     SwerveTrain::GetInstance().SetDriveBrake(false);
+    Limelight::GetInstance().setLime(false);
 }
 
 void Robot::TestInit() {}
