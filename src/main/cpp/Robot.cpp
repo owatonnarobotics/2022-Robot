@@ -141,7 +141,7 @@ void Robot::AutonomousInit() {
         bigSequence->AddStep(new SetShooter(0, 0));
     }
 
-    else if (selectedAuto == "2br") {
+    else if (selectedAuto == "2bs") {
 
         bigSequence->AddStep(new CalibrateNavXThenReset);
         bigSequence->AddStep(new WaitSeconds(1));
